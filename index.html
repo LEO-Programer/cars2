@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Autók Világa – 1000 Autó</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #1e1e1e;
+    }
+    h1 {
+      margin: 0 0 10px;
+    }
+    #searchBox {
+      width: 90%;
+      max-width: 400px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+    #carContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+    .car {
+      background: #1a1a1a;
+      border-radius: 10px;
+      margin: 10px;
+      padding: 10px;
+      width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .car img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .info {
+      padding: 10px 0;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      background: #333;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #555;
+    }
+    .pagination {
+      text-align: center;
+      padding: 20px;
+    }
+    .pagination button {
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚗 Autók Világa – 1000 Autó</h1>
+    <input type="text" id="searchBox" placeholder="Keresés autóra..." />
+  </header>
+  <main id="carContainer"></main>
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    const cars = (() => {
+      const brands = {
+        "BMW": ["M3", "M4", "X5", "i8", "320i"],
+        "Audi": ["A4", "A6", "RS7", "Q5", "TT"],
+        "Mercedes-Benz": ["C200", "E63 AMG", "GLA", "S500", "CLA 45"],
+        "Ford": ["Mustang", "Focus RS", "F-150", "Explorer", "Puma"],
+        "Lamborghini": ["Huracan", "Aventador", "Urus"],
+        "Ferrari": ["488 GTB", "Roma", "Portofino", "SF90"],
+        "Toyota": ["Supra", "Corolla", "Camry", "Land Cruiser", "Yaris"],
+        "Nissan": ["GT-R", "370Z", "Leaf", "X-Trail"],
+        "Tesla": ["Model S", "Model 3", "Model X", "Model Y"],
+        "Volkswagen": ["Golf", "Passat", "Arteon", "Tiguan"],
+        "Porsche": ["911", "Cayenne", "Panamera", "Taycan"]
+      };
+      const engines = ["1.6L I4", "2.0L Turbo", "3.0L V6", "4.0L V8", "5.2L V10", "Electric", "Hybrid", "3 Elektromotor"];
+      const powers = ["110 LE", "150 LE", "200 LE", "300 LE", "450 LE", "600 LE", "700 LE", "1020 LE"];
+      const images = [
+        "https://cdn.pixabay.com/photo/2017/01/06/19/15/car-1957037_1280.jpg",
+        "https://cdn.pixabay.com/photo/2020/05/02/19/58/car-5122380_1280.jpg",
+        "https://cdn.pixabay.com/photo/2021/08/17/18/26/tesla-6552860_1280.jpg",
+        "https://cdn.pixabay.com/photo/2016/03/27/21/16/auto-1283612_1280.jpg",
+        "https://cdn.pixabay.com/photo/2014/07/31/23/10/car-407165_1280.jpg",
+        "https://cdn.pixabay.com/photo/2015/01/19/13/51/car-604019_1280.jpg",
+        "https://cdn.pixabay.com/photo/2021/10/01/16/41/car-6671079_1280.jpg",
+        "https://cdn.pixabay.com/photo/2016/01/19/15/05/auto-1149997_1280.jpg",
+        "https://cdn.pixabay.com/photo/2017/06/21/18/27/auto-2428372_1280.jpg"
+      ];
+      const all = [];
+      let id = 1;
+      while (all.length < 1000) {
+        const brand = Object.keys(brands)[Math.floor(Math.random() * 11)];
+        const model = brands[brand][Math.floor(Math.random() * brands[brand].length)];
+        all.push({
+          id: id++,
+          name: `${brand} ${model}`,
+          power: powers[Math.floor(Math.random() * powers.length)],
+          engine: engines[Math.floor(Math.random() * engines.length)],
+          image: images[Math.floor(Math.random() * images.length)]
+        });
+      }
+      return all;
+    })();
+
+    let currentPage = 1;
+    const itemsPerPage = 20;
+    let favorites = JSON.parse(localStorage.getItem('favorites') || "[]");
+
+    function displayCars(list) {
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const carsToShow = list.slice(start, end);
+
+      const container = document.getElementById("carContainer");
+      container.innerHTML = "";
+      carsToShow.forEach(car => {
+        const isFav = favorites.includes(car.id);
+        container.innerHTML += `
+          <div class="car">
+            <img src="${car.image}" alt="${car.name}">
+            <div class="info">
+              <h3>${car.name}</h3>
+              <p><strong>Teljesítmény:</strong> ${car.power}</p>
+              <p><strong>Motor:</strong> ${car.engine}</p>
+              <button onclick="toggleFavorite(${car.id})">
+                ${isFav ? '❤️ Kedvenc' : '🤍 Kedvenchez'}
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      createPagination(list);
+    }
+
+    function createPagination(list) {
+      const pages = Math.ceil(list.length / itemsPerPage);
+      const pag = document.getElementById("pagination");
+      pag.innerHTML = "";
+      for (let i = 1; i <= pages; i++) {
+        pag.innerHTML += `<button onclick="changePage(${i})">${i}</button>`;
+      }
+    }
+
+    function changePage(page) {
+      currentPage = page;
+      const searchQuery = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = cars.filter(c => c.name.toLowerCase().includes(searchQuery));
+      displayCars(filtered);
+    }
+
+    function toggleFavorite(id) {
+      if (favorites.includes(id)) {
+        favorites = favorites.filter(f => f !== id);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+      changePage(currentPage);
+    }
+
+    document.getElementById("searchBox").addEventListener("input", () => {
+      currentPage = 1;
+      const query = document.getElementById("searchBox").value.toLowerCase();
+      const filtered = cars.filter(car => car.name.toLowerCase().includes(query));
+      displayCars(filtered);
+    });
+
+    window.onload = () => displayCars(cars);
+  </script>
+</body>
+</html>
